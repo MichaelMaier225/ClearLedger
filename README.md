@@ -1,24 +1,20 @@
-\# ClearLedger
+# ClearLedger
 
+ClearLedger is a Python based financial tracking system designed to help organize and analyze business transactions.
 
+## Project Structure
 
-ClearLedger is a Python-based financial tracking system designed to help organize and analyze business transactions.
+Backend
+- Core business logic
+- Data processing
+- APIs and models
 
+Frontend
+- User interface
+- Basic visualization and interaction
 
+## Tech Stack
+- Python
 
-\## Current Module
-
-\- Business Tracker
-
-
-
-\## Tech Stack
-
-\- Python
-
-
-
-\## Status
-
+## Status
 Early development
-
