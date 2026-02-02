@@ -8,7 +8,8 @@ import {
   SafeAreaView,
 } from "react-native"
 import { router } from "expo-router"
-import { addProduct } from "./products"
+
+import { addProduct } from "../../store/products"
 
 export default function AddProductScreen() {
   const [name, setName] = useState("")
@@ -16,9 +17,19 @@ export default function AddProductScreen() {
   const [price, setPrice] = useState("")
   const [cost, setCost] = useState("")
 
-  const saveProduct = () => {
-    if (!name || !qty || !price || !cost) return
-    addProduct(name, Number(qty), Number(price), Number(cost))
+  const handleAdd = () => {
+    if (!name.trim()) return
+    if (Number.isNaN(Number(qty))) return
+    if (Number.isNaN(Number(price))) return
+    if (Number.isNaN(Number(cost))) return
+
+    addProduct(
+      name.trim(),
+      Number(qty),
+      Number(price),
+      Number(cost)
+    )
+
     router.back()
   }
 
@@ -27,13 +38,39 @@ export default function AddProductScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Add Product</Text>
 
-        <TextInput placeholder="Name" value={name} onChangeText={setName} style={styles.input} />
-        <TextInput placeholder="Qty" value={qty} onChangeText={setQty} keyboardType="number-pad" style={styles.input} />
-        <TextInput placeholder="Price" value={price} onChangeText={setPrice} keyboardType="decimal-pad" style={styles.input} />
-        <TextInput placeholder="Cost" value={cost} onChangeText={setCost} keyboardType="decimal-pad" style={styles.input} />
+        <TextInput
+          style={styles.input}
+          placeholder="Product name"
+          value={name}
+          onChangeText={setName}
+        />
 
-        <TouchableOpacity style={styles.button} onPress={saveProduct}>
-          <Text style={styles.buttonText}>Save</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Starting quantity"
+          keyboardType="numeric"
+          value={qty}
+          onChangeText={setQty}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Price per unit"
+          keyboardType="numeric"
+          value={price}
+          onChangeText={setPrice}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Cost per unit"
+          keyboardType="numeric"
+          value={cost}
+          onChangeText={setCost}
+        />
+
+        <TouchableOpacity style={styles.button} onPress={handleAdd}>
+          <Text style={styles.buttonText}>ADD PRODUCT</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -41,21 +78,33 @@ export default function AddProductScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#fff" },
-  container: { padding: 20 },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
+  safe: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  container: {
+    padding: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
     padding: 12,
-    marginBottom: 16,
     borderRadius: 6,
+    marginBottom: 15,
   },
   button: {
     backgroundColor: "#000",
-    padding: 14,
-    borderRadius: 8,
+    padding: 15,
+    borderRadius: 6,
     alignItems: "center",
   },
-  buttonText: { color: "#fff", fontSize: 18 },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
 })

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import {
   View,
   Text,
@@ -7,131 +7,175 @@ import {
   SafeAreaView,
   Alert,
 } from "react-native"
-import { Link, useFocusEffect } from "expo-router"
+import { router, useFocusEffect } from "expo-router"
+
 import {
   getProducts,
-  updateQty,
-  removeProduct,
+  sellProduct,
+  restockProduct,
+  wasteProduct,
+  undoLastAction,
   Product,
-} from "./products"
+} from "../../store/products"
 
 export default function HomeScreen() {
   const [products, setProducts] = useState<Product[]>([])
-  const [revenue, setRevenue] = useState(0)
-  const [expenses, setExpenses] = useState(0)
+  const [canUndo, setCanUndo] = useState(false)
 
-  useFocusEffect(() => {
-    setProducts(getProducts())
-  })
-
-  const sellProduct = (product: Product) => {
-    if (product.qty <= 0) return
-    updateQty(product.id, -1)
-    setProducts(getProducts())
-    setRevenue(prev => prev + product.price)
+  const refresh = () => {
+    setProducts([...getProducts()])
   }
 
-  const wasteProduct = (product: Product) => {
-    if (product.qty <= 0) return
-    updateQty(product.id, -1)
-    setProducts(getProducts())
-  }
+  useFocusEffect(
+    useCallback(() => {
+      refresh()
+    }, [])
+  )
 
-  const confirmWaste = (product: Product) => {
+  const confirmAdjustment = (id: number) => {
     Alert.alert(
-      "Mark as waste?",
-      "Lost or spoiled item",
+      "Remove item from inventory?",
+      "This won’t affect profit.",
       [
-        { text: "Cancel", style: "cancel" },
         {
-          text: "Waste",
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Confirm",
           style: "destructive",
-          onPress: () => wasteProduct(product),
+          onPress: () => {
+            wasteProduct(id)
+            setCanUndo(true)
+            refresh()
+          },
         },
       ]
     )
   }
 
-  const restockProduct = (product: Product) => {
-    updateQty(product.id, 1)
-    setProducts(getProducts())
-    setExpenses(prev => prev + product.cost)
-  }
+  const revenue = products.reduce((sum, p) => sum + p.revenue, 0)
+  const expenses = products.reduce((sum, p) => sum + p.expenses, 0)
 
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
-        <Text style={styles.appName}>SAVN</Text>
+        <Text style={styles.title}>SAVN</Text>
 
-        <View style={styles.summary}>
-          <Text>Revenue: ${revenue.toFixed(2)}</Text>
-          <Text>Expenses: ${expenses.toFixed(2)}</Text>
-          <Text style={styles.profit}>
-            Profit: ${(revenue - expenses).toFixed(2)}
-          </Text>
-        </View>
+        <Text>Revenue: ${revenue.toFixed(2)}</Text>
+        <Text>Expenses: ${expenses.toFixed(2)}</Text>
+        <Text style={styles.profit}>
+          Profit: ${(revenue - expenses).toFixed(2)}
+        </Text>
 
-        <Link href="/add" asChild>
-          <TouchableOpacity style={styles.addButton}>
-            <Text style={styles.addText}>＋ Add Product</Text>
-          </TouchableOpacity>
-        </Link>
-
-        {products.map(product => (
-          <View key={product.id} style={styles.row}>
-            <Text style={styles.productName}>{product.name}</Text>
+        {products.map(p => (
+          <View key={p.id} style={styles.row}>
+            <TouchableOpacity
+              style={styles.nameWrap}
+              onPress={() =>
+                router.push({
+                  pathname: "/product/[id]",
+                  params: { id: String(p.id) },
+                })
+              }
+            >
+              <Text style={styles.name}>{p.name}</Text>
+            </TouchableOpacity>
 
             <View style={styles.controls}>
               <TouchableOpacity
-                style={styles.button}
-                onPress={() => sellProduct(product)}
-                onLongPress={() => confirmWaste(product)}
-              >
-                <Text style={styles.buttonText}>−</Text>
-              </TouchableOpacity>
-
-              <Text style={styles.qty}>{product.qty}</Text>
-
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => restockProduct(product)}
-              >
-                <Text style={styles.buttonText}>+</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
+                style={styles.btn}
                 onPress={() => {
-                  removeProduct(product.id)
-                  setProducts(getProducts())
+                  sellProduct(p.id)
+                  setCanUndo(true)
+                  refresh()
+                }}
+                onLongPress={() => confirmAdjustment(p.id)}
+              >
+                <Text style={styles.btnText}>−</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.qty}>{p.qty}</Text>
+
+              <TouchableOpacity
+                style={styles.btn}
+                onPress={() => {
+                  restockProduct(p.id)
+                  setCanUndo(true)
+                  refresh()
                 }}
               >
-                <Text style={styles.delete}>✕</Text>
+                <Text style={styles.btnText}>+</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.undoBtn,
+                  !canUndo && styles.undoDisabled,
+                ]}
+                disabled={!canUndo}
+                onPress={() => {
+                  undoLastAction()
+                  setCanUndo(false)
+                  refresh()
+                }}
+              >
+                <Text
+                  style={[
+                    styles.undoText,
+                    !canUndo && styles.undoTextDisabled,
+                  ]}
+                >
+                  ↺
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         ))}
+
+        <Text style={styles.helperText}>
+          Hold − to remove item from inventory
+        </Text>
       </View>
     </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#fff" },
-  container: { padding: 20 },
-  appName: { fontSize: 32, fontWeight: "bold" },
-  summary: { marginBottom: 20 },
-  profit: { fontWeight: "bold" },
-  addButton: { marginBottom: 20 },
-  addText: { fontSize: 18 },
+  safe: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  container: {
+    padding: 20,
+    flex: 1,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  profit: {
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
   },
-  productName: { fontSize: 18 },
-  controls: { flexDirection: "row", alignItems: "center" },
-  button: {
+  nameWrap: {
+    flex: 1,
+  },
+  name: {
+    fontSize: 18,
+  },
+  controls: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  btn: {
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -139,7 +183,40 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  buttonText: { color: "#fff", fontSize: 26 },
-  qty: { marginHorizontal: 14 },
-  delete: { color: "red", marginLeft: 12 },
+  btnText: {
+    color: "#fff",
+    fontSize: 26,
+  },
+  qty: {
+    marginHorizontal: 10,
+  },
+  undoBtn: {
+    marginLeft: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#bbb",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+  },
+  undoDisabled: {
+    borderColor: "#ddd",
+  },
+  undoText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  undoTextDisabled: {
+    color: "#ccc",
+  },
+  helperText: {
+    marginTop: "auto",
+    textAlign: "center",
+    color: "#888",
+    fontSize: 13,
+    paddingTop: 10,
+  },
 })
