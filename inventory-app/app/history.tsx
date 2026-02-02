@@ -5,7 +5,8 @@ import { useCallback, useState } from "react"
 import {
   getTransactions,
   Transaction,
-} from "../store/products"
+} from "../store/transactions"
+
 
 const formatTime = (timestamp: number) => {
   const date = new Date(timestamp)
