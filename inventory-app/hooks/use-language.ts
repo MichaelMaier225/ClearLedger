@@ -28,23 +28,25 @@ type TranslationKey =
   | "expenses"
   | "estimatedTotal"
   | "explore"
-  | "exploreIntro"
-  | "fileBasedRoutingBody"
-  | "fileBasedRoutingBody2"
-  | "fileBasedRoutingTitle"
-  | "imagesBody"
-  | "imagesTitle"
-  | "learnMore"
-  | "lightDarkModeBody"
-  | "lightDarkModeTitle"
-  | "platformSupportBody"
-  | "platformSupportTitle"
-  | "animationsBody"
-  | "animationsBody2"
-  | "animationsIosBody"
-  | "animationsTitle"
+  | "exploreHeadline"
+  | "exploreFastSalesTitle"
+  | "exploreFastSalesBody"
+  | "exploreBulkRestockTitle"
+  | "exploreBulkRestockBody"
+  | "exploreCatalogTitle"
+  | "exploreCatalogBody"
+  | "exploreHistoryTitle"
+  | "exploreHistoryBody"
+  | "exploreAnalyticsTitle"
+  | "exploreAnalyticsBody"
   | "grossMargin"
   | "grossProfit"
+  | "history"
+  | "historyTitle"
+  | "historyEmpty"
+  | "historySale"
+  | "historyRestock"
+  | "historyAdjustment"
   | "holdRestock"
   | "inventory"
   | "inventoryValue"
@@ -114,6 +116,12 @@ type TranslationKey =
   | "pricePerUnit"
   | "productName"
   | "save"
+  | "searchProducts"
+  | "searchPlaceholder"
+  | "searchResultsEmpty"
+  | "emptyInventoryTitle"
+  | "emptyInventoryBody"
+  | "emptyInventoryCta"
   | "updateProduct"
   | "vendorCatalogSubtitle"
   | "vendorCatalogTitle"
@@ -142,32 +150,30 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     expenses: "Expenses",
     estimatedTotal: "Estimated total",
     explore: "Explore",
-    exploreIntro:
-      "This app includes example code to help you get started.",
-    fileBasedRoutingBody:
-      "This app has two screens: app/(tabs)/index.tsx and app/(tabs)/explore.tsx.",
-    fileBasedRoutingBody2:
-      "The layout file in app/(tabs)/_layout.tsx sets up the tab navigator.",
-    fileBasedRoutingTitle: "File-based routing",
-    imagesBody:
-      "For static images, you can use the @2x and @3x suffixes to provide files for different screen densities.",
-    imagesTitle: "Images",
-    learnMore: "Learn more",
-    lightDarkModeBody:
-      "This template has light and dark mode support. The useColorScheme() hook lets you inspect what the user's current color scheme is, and so you can adjust UI colors accordingly.",
-    lightDarkModeTitle: "Light and dark mode components",
-    platformSupportBody:
-      "You can open this project on Android, iOS, and the web. To open the web version, press w in the terminal running this project.",
-    platformSupportTitle: "Android, iOS, and web support",
-    animationsBody:
-      "This template includes an example of an animated component. The components/HelloWave.tsx component uses the powerful react-native-reanimated library to create a waving hand animation.",
-    animationsBody2:
-      "The components/ParallaxScrollView.tsx component provides a parallax effect for the header image.",
-    animationsIosBody:
-      "The components/ParallaxScrollView.tsx component provides a parallax effect for the header image.",
-    animationsTitle: "Animations",
+    exploreHeadline: "Quick tips for busy vendor days.",
+    exploreFastSalesTitle: "Sell fast from the Inventory tab",
+    exploreFastSalesBody:
+      "Tap − or + to record sales and restocks in seconds. Each tap updates stock and revenue automatically.",
+    exploreBulkRestockTitle: "Long-press + for bulk restock",
+    exploreBulkRestockBody:
+      "When you restock a lot at once, long-press + to enter quantity and total cost in one step.",
+    exploreCatalogTitle: "Keep your catalog updated",
+    exploreCatalogBody:
+      "Add new items in Catalog, set prices and costs, and pause items without losing history.",
+    exploreHistoryTitle: "Track every sale",
+    exploreHistoryBody:
+      "History keeps a log of sales, restocks, and adjustments so you can review busy periods quickly.",
+    exploreAnalyticsTitle: "Know your best sellers",
+    exploreAnalyticsBody:
+      "Analytics shows top items, revenue, and low stock so you know what to restock first.",
     grossMargin: "Gross margin",
     grossProfit: "Gross profit",
+    history: "History",
+    historyTitle: "History",
+    historyEmpty: "No activity yet. Sales and restocks will show here.",
+    historySale: "Sold {quantity} {product} · {amount}",
+    historyRestock: "Restocked {quantity} {product} · {amount}",
+    historyAdjustment: "Adjusted {quantity} {product} · {amount}",
     holdRestock: "Hold + to restock in bulk.",
     inventory: "Inventory",
     inventoryValue: "Inventory value",
@@ -240,6 +246,13 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     pricePerUnit: "Price per unit",
     productName: "Product name",
     save: "Save",
+    searchProducts: "Search products",
+    searchPlaceholder: "Search by name",
+    searchResultsEmpty: "No products match this search.",
+    emptyInventoryTitle: "Add items before selling",
+    emptyInventoryBody:
+      "Create your catalog first so you can sell fast from the Inventory tab.",
+    emptyInventoryCta: "Go to Catalog",
     updateProduct: "Update",
     vendorCatalogSubtitle:
       "Add or remove products without affecting revenue or expenses.",
@@ -268,32 +281,31 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     expenses: "Chi phí",
     estimatedTotal: "Tổng ước tính",
     explore: "Khám phá",
-    exploreIntro:
-      "Ứng dụng này có các ví dụ để bạn bắt đầu nhanh hơn.",
-    fileBasedRoutingBody:
-      "Ứng dụng có hai màn hình: app/(tabs)/index.tsx và app/(tabs)/explore.tsx.",
-    fileBasedRoutingBody2:
-      "Tệp layout trong app/(tabs)/_layout.tsx thiết lập tab navigator.",
-    fileBasedRoutingTitle: "Điều hướng theo tệp",
-    imagesBody:
-      "Với ảnh tĩnh, bạn có thể dùng hậu tố @2x và @3x để phù hợp mật độ màn hình khác nhau.",
-    imagesTitle: "Hình ảnh",
-    learnMore: "Tìm hiểu thêm",
-    lightDarkModeBody:
-      "Mẫu này hỗ trợ chế độ sáng và tối. Hook useColorScheme() giúp bạn kiểm tra giao diện hiện tại để điều chỉnh màu sắc phù hợp.",
-    lightDarkModeTitle: "Thành phần sáng và tối",
-    platformSupportBody:
-      "Bạn có thể mở dự án này trên Android, iOS và web. Để mở bản web, nhấn w trong terminal đang chạy dự án.",
-    platformSupportTitle: "Hỗ trợ Android, iOS và web",
-    animationsBody:
-      "Mẫu này có ví dụ về thành phần có hiệu ứng. Thành phần components/HelloWave.tsx dùng thư viện react-native-reanimated để tạo hiệu ứng vẫy tay.",
-    animationsBody2:
-      "Thành phần components/ParallaxScrollView.tsx tạo hiệu ứng parallax cho ảnh tiêu đề.",
-    animationsIosBody:
-      "Thành phần components/ParallaxScrollView.tsx tạo hiệu ứng parallax cho ảnh tiêu đề.",
-    animationsTitle: "Hoạt ảnh",
+    exploreHeadline: "Mẹo nhanh cho ngày bán bận rộn.",
+    exploreFastSalesTitle: "Bán nhanh từ tab Tồn kho",
+    exploreFastSalesBody:
+      "Nhấn − hoặc + để ghi nhận bán hàng và nhập hàng trong vài giây. Mỗi lần nhấn sẽ cập nhật tồn kho và doanh thu.",
+    exploreBulkRestockTitle: "Nhấn giữ + để nhập số lượng lớn",
+    exploreBulkRestockBody:
+      "Khi nhập nhiều cùng lúc, hãy nhấn giữ + để nhập số lượng và tổng chi phí trong một bước.",
+    exploreCatalogTitle: "Giữ danh mục luôn cập nhật",
+    exploreCatalogBody:
+      "Thêm sản phẩm mới trong Danh mục, đặt giá bán và giá vốn, hoặc tạm dừng sản phẩm mà vẫn giữ lịch sử.",
+    exploreHistoryTitle: "Theo dõi mọi giao dịch",
+    exploreHistoryBody:
+      "Lịch sử lưu lại bán hàng, nhập hàng và điều chỉnh để bạn xem nhanh các thời điểm bận rộn.",
+    exploreAnalyticsTitle: "Biết sản phẩm bán chạy",
+    exploreAnalyticsBody:
+      "Phân tích hiển thị sản phẩm bán chạy, doanh thu và cảnh báo sắp hết hàng.",
     grossMargin: "Biên lợi nhuận gộp",
     grossProfit: "Lợi nhuận gộp",
+    history: "Lịch sử",
+    historyTitle: "Lịch sử",
+    historyEmpty:
+      "Chưa có hoạt động. Bán hàng và nhập hàng sẽ hiển thị ở đây.",
+    historySale: "Đã bán {quantity} {product} · {amount}",
+    historyRestock: "Đã nhập {quantity} {product} · {amount}",
+    historyAdjustment: "Điều chỉnh {quantity} {product} · {amount}",
     holdRestock: "Giữ + để nhập hàng số lượng lớn.",
     inventory: "Tồn kho",
     inventoryValue: "Giá trị tồn kho",
@@ -366,6 +378,13 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     pricePerUnit: "Giá bán mỗi đơn vị",
     productName: "Tên sản phẩm",
     save: "Lưu",
+    searchProducts: "Tìm sản phẩm",
+    searchPlaceholder: "Tìm theo tên",
+    searchResultsEmpty: "Không có sản phẩm phù hợp.",
+    emptyInventoryTitle: "Thêm sản phẩm trước khi bán",
+    emptyInventoryBody:
+      "Tạo danh mục trước để bạn bán nhanh trong tab Tồn kho.",
+    emptyInventoryCta: "Mở Danh mục",
     updateProduct: "Cập nhật",
     vendorCatalogSubtitle:
       "Thêm hoặc xóa sản phẩm mà không ảnh hưởng doanh thu hoặc chi phí.",

@@ -9,7 +9,7 @@ import {
   Modal,
   TextInput,
 } from "react-native"
-import { useFocusEffect } from "expo-router"
+import { useFocusEffect, useRouter } from "expo-router"
 
 import {
   getProducts,
@@ -32,6 +32,7 @@ export default function HomeScreen() {
   const [bulkTotal, setBulkTotal] = useState("")
   const [bulkTotalTouched, setBulkTotalTouched] = useState(false)
   const { t } = useLanguage()
+  const router = useRouter()
   const { currency, formatMoney, toDisplayValue, fromDisplayValue } =
     useCurrency()
   const displayDecimals = currency === "VND" ? 0 : 2
@@ -118,6 +119,7 @@ export default function HomeScreen() {
 
   const revenue = products.reduce((sum, p) => sum + p.revenue, 0)
   const expenses = products.reduce((sum, p) => sum + p.expenses, 0)
+  const hasActiveProducts = activeProducts.length > 0
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -134,66 +136,87 @@ export default function HomeScreen() {
           {t("profit")}: {formatMoney(revenue - expenses)}
         </Text>
 
-        {activeProducts.map(p => (
-          <View key={p.id} style={styles.row}>
-            <View style={styles.nameWrap}>
-              <Text style={styles.name}>{p.name}</Text>
-            </View>
+        {hasActiveProducts ? (
+          <>
+            {activeProducts.map(p => (
+              <View key={p.id} style={styles.row}>
+                <View style={styles.nameWrap}>
+                  <Text style={styles.name}>{p.name}</Text>
+                </View>
 
-            <View style={styles.controls}>
-              <TouchableOpacity
-                style={styles.btn}
-                onPress={() => {
-                  sellProduct(p.id)
-                  setCanUndo(true)
-                  refresh()
-                }}
-              >
-                <Text style={styles.btnText}>−</Text>
-              </TouchableOpacity>
+                <View style={styles.controls}>
+                  <TouchableOpacity
+                    style={styles.btn}
+                    onPress={() => {
+                      sellProduct(p.id)
+                      setCanUndo(true)
+                      refresh()
+                    }}
+                  >
+                    <Text style={styles.btnText}>−</Text>
+                  </TouchableOpacity>
 
-              <Text style={styles.qty}>{p.qty}</Text>
+                  <Text style={styles.qty}>{p.qty}</Text>
 
-              <TouchableOpacity
-                style={styles.btn}
-                onPress={() => {
-                  restockProduct(p.id)
-                  setCanUndo(true)
-                  refresh()
-                }}
-                onLongPress={() => openBulkRestock(p)}
-              >
-                <Text style={styles.btnText}>+</Text>
-              </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.btn}
+                    onPress={() => {
+                      restockProduct(p.id)
+                      setCanUndo(true)
+                      refresh()
+                    }}
+                    onLongPress={() => openBulkRestock(p)}
+                  >
+                    <Text style={styles.btnText}>+</Text>
+                  </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.undoBtn,
-                  !canUndo && styles.undoDisabled,
-                ]}
-                disabled={!canUndo}
-                onPress={() => {
-                  undoLastAction()
-                  setCanUndo(false)
-                  refresh()
-                }}
-              >
-                <Text
-                  style={[
-                    styles.undoText,
-                    !canUndo && styles.undoTextDisabled,
-                  ]}
-                >
-                  ↺
-                </Text>
-              </TouchableOpacity>
-            </View>
+                  <TouchableOpacity
+                    style={[
+                      styles.undoBtn,
+                      !canUndo && styles.undoDisabled,
+                    ]}
+                    disabled={!canUndo}
+                    onPress={() => {
+                      undoLastAction()
+                      setCanUndo(false)
+                      refresh()
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.undoText,
+                        !canUndo && styles.undoTextDisabled,
+                      ]}
+                    >
+                      ↺
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+
+            <Text style={styles.helperText}>
+              {t("holdRestock")}
+            </Text>
+          </>
+        ) : (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>
+              {t("emptyInventoryTitle")}
+            </Text>
+            <Text style={styles.emptyBody}>
+              {t("emptyInventoryBody")}
+            </Text>
+            <TouchableOpacity
+              style={styles.emptyButton}
+              onPress={() => router.push("/catalog")}
+            >
+              <Text style={styles.emptyButtonText}>
+                {t("emptyInventoryCta")}
+              </Text>
+            </TouchableOpacity>
           </View>
-        ))}
-
-        <Text style={styles.helperText}>
-          {t("holdRestock")}
-        </Text>
+        )}
       </View>
 
       <Modal
@@ -326,6 +349,34 @@ const styles = StyleSheet.create({
     color: "#888",
     fontSize: 13,
     paddingTop: 10,
+  },
+  emptyCard: {
+    marginTop: 24,
+    borderWidth: 1,
+    borderColor: "#eee",
+    borderRadius: 12,
+    padding: 16,
+    backgroundColor: "#fafafa",
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 6,
+  },
+  emptyBody: {
+    color: "#555",
+    marginBottom: 12,
+    lineHeight: 20,
+  },
+  emptyButton: {
+    backgroundColor: "#000",
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  emptyButtonText: {
+    color: "#fff",
+    fontWeight: "600",
   },
   modalOverlay: {
     flex: 1,
