@@ -35,6 +35,11 @@ load()
 
 export const getTransactions = () => transactions
 
+export const setTransactions = (next: Transaction[]) => {
+  transactions = next
+  save()
+}
+
 export const recordTransaction = (
   tx: Omit<Transaction, "id" | "timestamp">
 ) => {

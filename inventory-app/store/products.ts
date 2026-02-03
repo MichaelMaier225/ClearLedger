@@ -1,4 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import {
+  getTransactions,
+  recordTransaction,
+  setTransactions,
+  Transaction,
+} from "./transactions"
 
 export type Product = {
   id: number
@@ -14,6 +20,7 @@ export type Product = {
 
 type Snapshot = {
   products: Product[]
+  transactions: Transaction[]
 }
 
 const STORAGE_KEY = "SAVN_PRODUCTS"
@@ -40,7 +47,24 @@ const loadState = async () => {
   }
 
   if (storedUndo) {
-    previousState = JSON.parse(storedUndo)
+    const parsed = JSON.parse(storedUndo)
+    if (parsed && Array.isArray(parsed.products)) {
+      previousState = {
+        products: parsed.products.map((product: Product) => ({
+          ...product,
+        })),
+        transactions: Array.isArray(parsed.transactions)
+          ? parsed.transactions
+          : [],
+      }
+    } else if (Array.isArray(parsed)) {
+      previousState = {
+        products: parsed.map((product: Product) => ({
+          ...product,
+        })),
+        transactions: [],
+      }
+    }
   }
 }
 
@@ -49,6 +73,7 @@ loadState()
 const snapshot = () => {
   previousState = {
     products: products.map(p => ({ ...p })),
+    transactions: getTransactions().map(tx => ({ ...tx })),
   }
 }
 
@@ -110,15 +135,29 @@ export const addCatalogProduct = (
 export const sellProduct = (id: number) => {
   snapshot()
 
-  products = products.map(p =>
-    p.id === id && p.qty > 0
-      ? {
-          ...p,
-          qty: p.qty - 1,
-          revenue: p.revenue + p.price,
-        }
-      : p
-  )
+  let soldProduct: Product | null = null
+
+  products = products.map(p => {
+    if (p.id === id && p.qty > 0) {
+      soldProduct = p
+      return {
+        ...p,
+        qty: p.qty - 1,
+        revenue: p.revenue + p.price,
+      }
+    }
+    return p
+  })
+
+  if (soldProduct) {
+    recordTransaction({
+      productId: soldProduct.id,
+      productName: soldProduct.name,
+      type: "sale",
+      quantity: 1,
+      amount: soldProduct.price,
+    })
+  }
 
   saveState()
 }
@@ -126,15 +165,29 @@ export const sellProduct = (id: number) => {
 export const restockProduct = (id: number) => {
   snapshot()
 
-  products = products.map(p =>
-    p.id === id
-      ? {
-          ...p,
-          qty: p.qty + 1,
-          expenses: p.expenses + p.cost,
-        }
-      : p
-  )
+  let restockedProduct: Product | null = null
+
+  products = products.map(p => {
+    if (p.id === id) {
+      restockedProduct = p
+      return {
+        ...p,
+        qty: p.qty + 1,
+        expenses: p.expenses + p.cost,
+      }
+    }
+    return p
+  })
+
+  if (restockedProduct) {
+    recordTransaction({
+      productId: restockedProduct.id,
+      productName: restockedProduct.name,
+      type: "restock",
+      quantity: 1,
+      amount: restockedProduct.cost,
+    })
+  }
 
   saveState()
 }
@@ -148,15 +201,29 @@ export const restockProductBulk = (
 
   snapshot()
 
-  products = products.map(p =>
-    p.id === id
-      ? {
-          ...p,
-          qty: p.qty + qtyToAdd,
-          expenses: p.expenses + totalCost,
-        }
-      : p
-  )
+  let restockedProduct: Product | null = null
+
+  products = products.map(p => {
+    if (p.id === id) {
+      restockedProduct = p
+      return {
+        ...p,
+        qty: p.qty + qtyToAdd,
+        expenses: p.expenses + totalCost,
+      }
+    }
+    return p
+  })
+
+  if (restockedProduct) {
+    recordTransaction({
+      productId: restockedProduct.id,
+      productName: restockedProduct.name,
+      type: "restock",
+      quantity: qtyToAdd,
+      amount: totalCost,
+    })
+  }
 
   saveState()
 }
@@ -166,14 +233,31 @@ export const setProductInventory = (id: number, newQty: number) => {
 
   snapshot()
 
-  products = products.map(p =>
-    p.id === id
-      ? {
-          ...p,
-          qty: Math.max(0, Math.floor(newQty)),
-        }
-      : p
-  )
+  let adjustedProduct: Product | null = null
+  let adjustmentQty = 0
+
+  products = products.map(p => {
+    if (p.id === id) {
+      adjustedProduct = p
+      const nextQty = Math.max(0, Math.floor(newQty))
+      adjustmentQty = nextQty - p.qty
+      return {
+        ...p,
+        qty: nextQty,
+      }
+    }
+    return p
+  })
+
+  if (adjustedProduct && adjustmentQty !== 0) {
+    recordTransaction({
+      productId: adjustedProduct.id,
+      productName: adjustedProduct.name,
+      type: "adjustment",
+      quantity: Math.abs(adjustmentQty),
+      amount: 0,
+    })
+  }
 
   saveState()
 }
@@ -181,14 +265,28 @@ export const setProductInventory = (id: number, newQty: number) => {
 export const wasteProduct = (id: number) => {
   snapshot()
 
-  products = products.map(p =>
-    p.id === id && p.qty > 0
-      ? {
-          ...p,
-          qty: p.qty - 1,
-        }
-      : p
-  )
+  let wastedProduct: Product | null = null
+
+  products = products.map(p => {
+    if (p.id === id && p.qty > 0) {
+      wastedProduct = p
+      return {
+        ...p,
+        qty: p.qty - 1,
+      }
+    }
+    return p
+  })
+
+  if (wastedProduct) {
+    recordTransaction({
+      productId: wastedProduct.id,
+      productName: wastedProduct.name,
+      type: "adjustment",
+      quantity: 1,
+      amount: 0,
+    })
+  }
 
   saveState()
 }
@@ -198,14 +296,31 @@ export const wasteProductBulk = (id: number, qtyToRemove: number) => {
 
   snapshot()
 
-  products = products.map(p =>
-    p.id === id
-      ? {
-          ...p,
-          qty: Math.max(0, p.qty - qtyToRemove),
-        }
-      : p
-  )
+  let wastedProduct: Product | null = null
+  let removedQty = 0
+
+  products = products.map(p => {
+    if (p.id === id) {
+      wastedProduct = p
+      const nextQty = Math.max(0, p.qty - qtyToRemove)
+      removedQty = p.qty - nextQty
+      return {
+        ...p,
+        qty: nextQty,
+      }
+    }
+    return p
+  })
+
+  if (wastedProduct && removedQty > 0) {
+    recordTransaction({
+      productId: wastedProduct.id,
+      productName: wastedProduct.name,
+      type: "adjustment",
+      quantity: removedQty,
+      amount: 0,
+    })
+  }
 
   saveState()
 }
@@ -267,6 +382,9 @@ export const undoLastAction = () => {
   if (!previousState) return
 
   products = previousState.products.map(p => ({ ...p }))
+  setTransactions(
+    previousState.transactions.map(tx => ({ ...tx }))
+  )
   previousState = null
 
   saveState()
