@@ -1,30 +1,35 @@
-import { View, Text, FlatList, StyleSheet, SafeAreaView } from "react-native"
-import { useFocusEffect } from "expo-router"
-import { useCallback, useState } from "react"
-
+import { useCallback, useMemo, useState } from "react"
 import {
-  getTransactions,
-  Transaction,
-} from "../store/transactions"
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  SafeAreaView,
+} from "react-native"
+import { useFocusEffect } from "expo-router"
 
+import { getTransactions, Transaction } from "../../store/transactions"
+import { useLanguage } from "../../hooks/use-language"
+import { useCurrency } from "../../hooks/use-currency"
 
 const formatTime = (timestamp: number) => {
   const date = new Date(timestamp)
   return date.toLocaleString()
 }
 
-const formatRow = (t: Transaction) => {
-  if (t.type === "sale") {
-    return `Sold ${t.quantity} ${t.productName} – $${t.amount.toFixed(2)}`
-  }
-  if (t.type === "restock") {
-    return `Restocked ${t.quantity} ${t.productName} – $${t.amount.toFixed(2)}`
-  }
-  return `Adjustment ${t.quantity} ${t.productName} – $${t.amount.toFixed(2)}`
-}
+const applyTemplate = (
+  template: string,
+  data: Record<string, string>
+) =>
+  Object.entries(data).reduce(
+    (acc, [key, value]) => acc.replace(`{${key}}`, value),
+    template
+  )
 
 export default function HistoryScreen() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const { t } = useLanguage()
+  const { formatMoney } = useCurrency()
 
   useFocusEffect(
     useCallback(() => {
@@ -33,10 +38,28 @@ export default function HistoryScreen() {
     }, [])
   )
 
+  const templateByType = useMemo(
+    () => ({
+      sale: t("historySale"),
+      restock: t("historyRestock"),
+      adjustment: t("historyAdjustment"),
+    }),
+    [t]
+  )
+
+  const formatRow = (transaction: Transaction) => {
+    const template = templateByType[transaction.type]
+    return applyTemplate(template, {
+      quantity: String(transaction.quantity),
+      product: transaction.productName,
+      amount: formatMoney(transaction.amount),
+    })
+  }
+
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
-        <Text style={styles.title}>History</Text>
+        <Text style={styles.title}>{t("historyTitle")}</Text>
 
         <FlatList
           data={transactions}
@@ -46,18 +69,14 @@ export default function HistoryScreen() {
           )}
           renderItem={({ item }) => (
             <View style={styles.row}>
-              <Text style={styles.text}>
-                {formatRow(item)}
-              </Text>
+              <Text style={styles.text}>{formatRow(item)}</Text>
               <Text style={styles.time}>
                 {formatTime(item.timestamp)}
               </Text>
             </View>
           )}
           ListEmptyComponent={
-            <Text style={styles.empty}>
-              No activity yet
-            </Text>
+            <Text style={styles.empty}>{t("historyEmpty")}</Text>
           }
         />
       </View>
@@ -98,5 +117,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 40,
     color: "#777",
+    lineHeight: 20,
   },
 })

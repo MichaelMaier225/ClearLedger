@@ -1,88 +1,104 @@
-import { Image } from "expo-image"
-import { Platform, StyleSheet } from "react-native"
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native"
 
-import { Collapsible } from "@/components/ui/collapsible"
-import { ExternalLink } from "@/components/external-link"
-import ParallaxScrollView from "@/components/parallax-scroll-view"
-import { ThemedText } from "@/components/themed-text"
-import { ThemedView } from "@/components/themed-view"
-import { IconSymbol } from "@/components/ui/icon-symbol"
-import { Fonts } from "@/constants/theme"
 import { useLanguage } from "../../hooks/use-language"
 
-export default function TabTwoScreen() {
+export default function ExploreScreen() {
   const { t } = useLanguage()
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}
-        >
-          {t("explore")}
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>{t("exploreIntro")}</ThemedText>
-      <Collapsible title={t("fileBasedRoutingTitle")}>
-        <ThemedText>{t("fileBasedRoutingBody")}</ThemedText>
-        <ThemedText>{t("fileBasedRoutingBody2")}</ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">{t("learnMore")}</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title={t("platformSupportTitle")}>
-        <ThemedText>{t("platformSupportBody")}</ThemedText>
-      </Collapsible>
-      <Collapsible title={t("imagesTitle")}>
-        <ThemedText>{t("imagesBody")}</ThemedText>
-        <Image
-          source={require("@/assets/images/react-logo.png")}
-          style={{ width: 100, height: 100, alignSelf: "center" }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">{t("learnMore")}</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title={t("lightDarkModeTitle")}>
-        <ThemedText>{t("lightDarkModeBody")}</ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">{t("learnMore")}</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title={t("animationsTitle")}>
-        <ThemedText>{t("animationsBody")}</ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>{t("animationsIosBody")}</ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>{t("explore")}</Text>
+        <Text style={styles.subtitle}>{t("exploreHeadline")}</Text>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>
+            {t("exploreFastSalesTitle")}
+          </Text>
+          <Text style={styles.cardBody}>
+            {t("exploreFastSalesBody")}
+          </Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>
+            {t("exploreBulkRestockTitle")}
+          </Text>
+          <Text style={styles.cardBody}>
+            {t("exploreBulkRestockBody")}
+          </Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>
+            {t("exploreCatalogTitle")}
+          </Text>
+          <Text style={styles.cardBody}>
+            {t("exploreCatalogBody")}
+          </Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>
+            {t("exploreHistoryTitle")}
+          </Text>
+          <Text style={styles.cardBody}>
+            {t("exploreHistoryBody")}
+          </Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>
+            {t("exploreAnalyticsTitle")}
+          </Text>
+          <Text style={styles.cardBody}>
+            {t("exploreAnalyticsBody")}
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
+  safe: {
+    flex: 1,
+    backgroundColor: "#fff",
   },
-  titleContainer: {
-    flexDirection: "row",
-    gap: 8,
+  container: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  subtitle: {
+    color: "#555",
+    marginBottom: 20,
+  },
+  card: {
+    borderWidth: 1,
+    borderColor: "#eee",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    backgroundColor: "#fafafa",
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 6,
+  },
+  cardBody: {
+    color: "#555",
+    lineHeight: 20,
   },
 })

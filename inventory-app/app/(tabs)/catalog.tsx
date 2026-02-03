@@ -33,6 +33,7 @@ export default function CatalogScreen() {
   const [editingPrice, setEditingPrice] = useState("")
   const [editingCost, setEditingCost] = useState("")
   const [editingInventory, setEditingInventory] = useState("")
+  const [search, setSearch] = useState("")
   const { t } = useLanguage()
   const { currency, formatMoney, toDisplayValue, fromDisplayValue } =
     useCurrency()
@@ -146,9 +147,18 @@ export default function CatalogScreen() {
     )
   }
 
-  const visibleProducts = products.filter(p => !p.isArchived)
+  const normalizedSearch = search.trim().toLowerCase()
+  const visibleProducts = products.filter(
+    p =>
+      !p.isArchived &&
+      (!normalizedSearch ||
+        p.name.toLowerCase().includes(normalizedSearch))
+  )
   const activeProducts = visibleProducts.filter(p => p.isActive)
   const inactiveProducts = visibleProducts.filter(p => !p.isActive)
+  const hasSearch = normalizedSearch.length > 0
+  const hasSearchResults =
+    activeProducts.length > 0 || inactiveProducts.length > 0
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -157,6 +167,22 @@ export default function CatalogScreen() {
         <Text style={styles.subtitle}>
           {t("vendorCatalogSubtitle")}
         </Text>
+
+        <View style={styles.searchCard}>
+          <Text style={styles.searchLabel}>{t("searchProducts")}</Text>
+          <TextInput
+            style={styles.input}
+            placeholder={t("searchPlaceholder")}
+            value={search}
+            onChangeText={setSearch}
+            autoCorrect={false}
+          />
+          {hasSearch && !hasSearchResults ? (
+            <Text style={styles.emptyHint}>
+              {t("searchResultsEmpty")}
+            </Text>
+          ) : null}
+        </View>
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>{t("newProduct")}</Text>
@@ -351,6 +377,19 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 20,
   },
+  searchCard: {
+    borderWidth: 1,
+    borderColor: "#eee",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    backgroundColor: "#fafafa",
+  },
+  searchLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 10,
+  },
   section: {
     marginBottom: 20,
   },
@@ -434,6 +473,11 @@ const styles = StyleSheet.create({
   emptyText: {
     color: "#888",
     fontSize: 13,
+  },
+  emptyHint: {
+    color: "#888",
+    fontSize: 12,
+    marginTop: -4,
   },
   modalOverlay: {
     flex: 1,
