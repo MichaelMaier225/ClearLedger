@@ -126,6 +126,23 @@ export const restockProductBulk = (
   saveState()
 }
 
+export const adjustInventory = (id: number, qtyDelta: number) => {
+  if (qtyDelta === 0) return
+
+  snapshot()
+
+  products = products.map(p =>
+    p.id === id
+      ? {
+          ...p,
+          qty: Math.max(0, p.qty + qtyDelta),
+        }
+      : p
+  )
+
+  saveState()
+}
+
 export const wasteProduct = (id: number) => {
   snapshot()
 
@@ -134,7 +151,23 @@ export const wasteProduct = (id: number) => {
       ? {
           ...p,
           qty: p.qty - 1,
-          expenses: p.expenses + p.cost,
+        }
+      : p
+  )
+
+  saveState()
+}
+
+export const wasteProductBulk = (id: number, qtyToRemove: number) => {
+  if (qtyToRemove <= 0) return
+
+  snapshot()
+
+  products = products.map(p =>
+    p.id === id
+      ? {
+          ...p,
+          qty: Math.max(0, p.qty - qtyToRemove),
         }
       : p
   )
