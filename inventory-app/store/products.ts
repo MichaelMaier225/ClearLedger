@@ -8,6 +8,7 @@ export type Product = {
   cost: number
   revenue: number
   expenses: number
+  isActive: boolean
 }
 
 type Snapshot = {
@@ -30,7 +31,10 @@ const loadState = async () => {
   const storedUndo = await AsyncStorage.getItem(UNDO_KEY)
 
   if (storedProducts) {
-    products = JSON.parse(storedProducts)
+    products = JSON.parse(storedProducts).map((product: Product) => ({
+      ...product,
+      isActive: product.isActive ?? true,
+    }))
   }
 
   if (storedUndo) {
@@ -47,6 +51,7 @@ const snapshot = () => {
 }
 
 export const getProducts = () => products
+export const getActiveProducts = () => products.filter(p => p.isActive)
 
 export const addProduct = (
   name: string,
@@ -66,6 +71,31 @@ export const addProduct = (
       cost,
       revenue: 0,
       expenses: qty * cost,
+      isActive: true,
+    },
+  ]
+
+  saveState()
+}
+
+export const addCatalogProduct = (
+  name: string,
+  price: number,
+  cost: number
+) => {
+  snapshot()
+
+  products = [
+    ...products,
+    {
+      id: Date.now(),
+      name,
+      qty: 0,
+      price,
+      cost,
+      revenue: 0,
+      expenses: 0,
+      isActive: true,
     },
   ]
 
@@ -175,6 +205,21 @@ export const updateProduct = (
           name: updates.name,
           price: updates.price,
           cost: updates.cost,
+        }
+      : p
+  )
+
+  saveState()
+}
+
+export const setProductActive = (id: number, isActive: boolean) => {
+  snapshot()
+
+  products = products.map(p =>
+    p.id === id
+      ? {
+          ...p,
+          isActive,
         }
       : p
   )

@@ -13,6 +13,7 @@ import { router, useFocusEffect } from "expo-router"
 
 import {
   getProducts,
+  getActiveProducts,
   sellProduct,
   restockProduct,
   restockProductBulk,
@@ -23,6 +24,7 @@ import {
 
 export default function HomeScreen() {
   const [products, setProducts] = useState<Product[]>([])
+  const [activeProducts, setActiveProducts] = useState<Product[]>([])
   const [canUndo, setCanUndo] = useState(false)
   const [bulkProduct, setBulkProduct] = useState<Product | null>(null)
   const [bulkQty, setBulkQty] = useState("1")
@@ -33,6 +35,7 @@ export default function HomeScreen() {
 
   const refresh = () => {
     setProducts([...getProducts()])
+    setActiveProducts([...getActiveProducts()])
   }
 
   useFocusEffect(
@@ -139,7 +142,7 @@ export default function HomeScreen() {
           Profit: ${(revenue - expenses).toFixed(2)}
         </Text>
 
-        {products.map(p => (
+        {activeProducts.map(p => (
           <View key={p.id} style={styles.row}>
             <TouchableOpacity
               style={styles.nameWrap}
