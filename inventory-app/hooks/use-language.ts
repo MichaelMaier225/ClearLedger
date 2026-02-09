@@ -63,6 +63,8 @@ type TranslationKey =
   | "language"
   | "lowStock"
   | "monthly"
+  | "yearly"
+  | "allTime"
   | "mostRestockedItem"
   | "mostSoldItem"
   | "apply"
@@ -81,6 +83,8 @@ type TranslationKey =
   | "salesTrend"
   | "salesLogged"
   | "profit"
+  | "productBreakdown"
+  | "totalProducts"
   | "productInsights"
   | "qtyUnitCost"
   | "qtyUnitPrice"
@@ -101,6 +105,11 @@ type TranslationKey =
   | "weekly"
   | "daily"
   | "revenueVsRestock"
+  | "resetData"
+  | "resetDataHelper"
+  | "resetDataTitle"
+  | "resetDataBody"
+  | "resetDataAction"
   | "currencyUSD"
   | "currencyVND"
   | "activeItems"
@@ -208,6 +217,8 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     language: "Language",
     lowStock: "Low stock",
     monthly: "Monthly",
+    yearly: "Yearly",
+    allTime: "All time",
     mostRestockedItem: "Most restocked item",
     mostSoldItem: "Most sold item",
     apply: "Apply",
@@ -226,6 +237,8 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     salesTrend: "Sales trend",
     salesLogged: "total sales logged.",
     profit: "Profit",
+    productBreakdown: "Product breakdown",
+    totalProducts: "Total products",
     productInsights: "Product insights",
     qtyUnitCost: "qty × unit cost",
     qtyUnitPrice: "qty × unit price",
@@ -246,6 +259,13 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     weekly: "Weekly",
     daily: "Daily",
     revenueVsRestock: "Revenue vs restock spend",
+    resetData: "Reset app data",
+    resetDataHelper:
+      "Delete all products, transactions, and settings on this device.",
+    resetDataTitle: "Reset all data?",
+    resetDataBody:
+      "This will permanently remove products, transactions, and preferences from this device.",
+    resetDataAction: "Reset data",
     currencyUSD: "US dollar (USD)",
     currencyVND: "Vietnamese dong (VND)",
     activeItems: "Active items",
@@ -359,6 +379,8 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     language: "Ngôn ngữ",
     lowStock: "Sắp hết hàng",
     monthly: "Theo tháng",
+    yearly: "Theo năm",
+    allTime: "Mọi thời gian",
     mostRestockedItem: "Mặt hàng nhập nhiều nhất",
     mostSoldItem: "Mặt hàng bán chạy nhất",
     apply: "Áp dụng",
@@ -377,6 +399,8 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     salesTrend: "Xu hướng bán hàng",
     salesLogged: "giao dịch bán hàng đã ghi.",
     profit: "Lợi nhuận",
+    productBreakdown: "Tổng quan sản phẩm",
+    totalProducts: "Tổng số sản phẩm",
     productInsights: "Thông tin sản phẩm",
     qtyUnitCost: "số lượng × giá vốn",
     qtyUnitPrice: "số lượng × giá bán",
@@ -397,6 +421,13 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     weekly: "Theo tuần",
     daily: "Theo ngày",
     revenueVsRestock: "Doanh thu và chi phí nhập",
+    resetData: "Đặt lại dữ liệu ứng dụng",
+    resetDataHelper:
+      "Xóa tất cả sản phẩm, giao dịch và cài đặt trên thiết bị này.",
+    resetDataTitle: "Đặt lại toàn bộ dữ liệu?",
+    resetDataBody:
+      "Thao tác này sẽ xóa vĩnh viễn sản phẩm, giao dịch và tùy chọn trên thiết bị này.",
+    resetDataAction: "Đặt lại dữ liệu",
     currencyUSD: "Đô la Mỹ (USD)",
     currencyVND: "Việt Nam đồng (VND)",
     activeItems: "Mặt hàng đang bán",

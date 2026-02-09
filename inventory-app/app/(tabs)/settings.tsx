@@ -1,5 +1,6 @@
 import { useState } from "react"
 import {
+  Alert,
   View,
   Text,
   StyleSheet,
@@ -9,7 +10,10 @@ import {
 
 import { useLanguage } from "../../hooks/use-language"
 import { useCurrency } from "../../hooks/use-currency"
+import { resetProducts } from "../../store/products"
+import { resetTransactions } from "../../store/transactions"
 import { Currency, Language } from "../../store/settings"
+import { resetSettings } from "../../store/settings"
 
 const languageOptions: Array<{
   value: Language
@@ -46,6 +50,21 @@ export default function SettingsScreen() {
     { value: "USD", label: t("currencyUSD") },
     { value: "VND", label: t("currencyVND") },
   ]
+
+  const handleReset = () => {
+    Alert.alert(t("resetDataTitle"), t("resetDataBody"), [
+      { text: t("cancel"), style: "cancel" },
+      {
+        text: t("resetDataAction"),
+        style: "destructive",
+        onPress: async () => {
+          await resetProducts()
+          await resetTransactions()
+          await resetSettings()
+        },
+      },
+    ])
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -105,6 +124,19 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             )
           })}
+        </View>
+
+        <View style={[styles.card, styles.cardSpacing]}>
+          <Text style={styles.sectionTitle}>{t("resetData")}</Text>
+          <Text style={styles.helperText}>{t("resetDataHelper")}</Text>
+          <TouchableOpacity
+            style={styles.destructiveButton}
+            onPress={handleReset}
+          >
+            <Text style={styles.destructiveButtonText}>
+              {t("resetDataAction")}
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -179,5 +211,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#777",
     marginBottom: 12,
+  },
+  destructiveButton: {
+    backgroundColor: "#fff0f0",
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#f3b5b5",
+  },
+  destructiveButtonText: {
+    color: "#b42318",
+    fontWeight: "600",
+    fontSize: 14,
   },
 })

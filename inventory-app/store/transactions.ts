@@ -51,3 +51,8 @@ export const recordTransaction = (
 
   save()
 }
+
+export const resetTransactions = async () => {
+  transactions = []
+  await AsyncStorage.removeItem(STORAGE_KEY)
+}

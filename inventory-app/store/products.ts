@@ -425,3 +425,9 @@ export const undoLastAction = () => {
 
   saveState()
 }
+
+export const resetProducts = async () => {
+  products = []
+  previousState = null
+  await AsyncStorage.multiRemove([STORAGE_KEY, UNDO_KEY])
+}

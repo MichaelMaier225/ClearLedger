@@ -71,3 +71,11 @@ export const subscribeToCurrency = (
     currencyListeners.delete(listener)
   }
 }
+
+export const resetSettings = async () => {
+  language = DEFAULT_LANGUAGE
+  currency = DEFAULT_CURRENCY
+  await AsyncStorage.multiRemove([STORAGE_KEY, CURRENCY_KEY])
+  notify()
+  notifyCurrency()
+}
