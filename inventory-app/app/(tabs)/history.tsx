@@ -1,14 +1,17 @@
 import { useCallback, useMemo, useState } from "react"
 import {
+  Alert,
   View,
   Text,
   FlatList,
   StyleSheet,
   SafeAreaView,
+  Pressable,
 } from "react-native"
 import { useFocusEffect } from "expo-router"
 
 import { getTransactions, Transaction } from "../../store/transactions"
+import { undoTransaction } from "../../store/products"
 import { useLanguage } from "../../hooks/use-language"
 import { useCurrency } from "../../hooks/use-currency"
 
@@ -31,11 +34,15 @@ export default function HistoryScreen() {
   const { t } = useLanguage()
   const { formatMoney } = useCurrency()
 
+  const refreshTransactions = useCallback(() => {
+    const data = [...getTransactions()].reverse()
+    setTransactions(data)
+  }, [])
+
   useFocusEffect(
     useCallback(() => {
-      const data = [...getTransactions()].reverse()
-      setTransactions(data)
-    }, [])
+      refreshTransactions()
+    }, [refreshTransactions])
   )
 
   const templateByType = useMemo(
@@ -56,6 +63,28 @@ export default function HistoryScreen() {
     })
   }
 
+  const handleUndo = useCallback(
+    (transaction: Transaction) => {
+      Alert.alert(
+        t("undoTransactionTitle"),
+        t("undoTransactionBody"),
+        [
+          { text: t("cancel"), style: "cancel" },
+          {
+            text: t("undo"),
+            style: "destructive",
+            onPress: () => {
+              undoTransaction(transaction.id)
+              refreshTransactions()
+            },
+          },
+        ],
+        { cancelable: true }
+      )
+    },
+    [refreshTransactions, t]
+  )
+
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
@@ -69,7 +98,16 @@ export default function HistoryScreen() {
           )}
           renderItem={({ item }) => (
             <View style={styles.row}>
-              <Text style={styles.text}>{formatRow(item)}</Text>
+              <View style={styles.rowHeader}>
+                <Text style={styles.text}>{formatRow(item)}</Text>
+                <Pressable
+                  onPress={() => handleUndo(item)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("undo")}
+                >
+                  <Text style={styles.undo}>{t("undo")}</Text>
+                </Pressable>
+              </View>
               <Text style={styles.time}>
                 {formatTime(item.timestamp)}
               </Text>
@@ -101,13 +139,24 @@ const styles = StyleSheet.create({
   row: {
     paddingVertical: 10,
   },
+  rowHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+  },
   text: {
     fontSize: 15,
+    flex: 1,
   },
   time: {
     fontSize: 12,
     color: "#777",
     marginTop: 2,
+  },
+  undo: {
+    fontSize: 13,
+    color: "#888",
   },
   separator: {
     height: 1,
