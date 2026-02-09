@@ -9,11 +9,18 @@ import {
 } from "react-native"
 import { useFocusEffect } from "expo-router"
 
+import { getProducts, Product } from "../../store/products"
 import { getTransactions, Transaction } from "../../store/transactions"
 import { useCurrency } from "../../hooks/use-currency"
 import { useLanguage } from "../../hooks/use-language"
 
-type RangeKey = "hourly" | "daily" | "weekly" | "monthly"
+type RangeKey =
+  | "hourly"
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "yearly"
+  | "allTime"
 
 type Bucket = {
   label: string
@@ -39,7 +46,12 @@ const monthLabels = [
   "Dec",
 ]
 
-const buildBuckets = (range: RangeKey, now: Date): Bucket[] => {
+const buildBuckets = (
+  range: RangeKey,
+  now: Date,
+  transactions: Transaction[],
+  allTimeLabel: string
+): Bucket[] => {
   const buckets: Bucket[] = []
   const nowTime = now.getTime()
 
@@ -98,7 +110,7 @@ const buildBuckets = (range: RangeKey, now: Date): Bucket[] => {
         salesCount: 0,
       })
     }
-  } else {
+  } else if (range === "monthly") {
     for (let i = 5; i >= 0; i -= 1) {
       const start = new Date(now.getFullYear(), now.getMonth() - i, 1)
       const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 1)
@@ -111,12 +123,41 @@ const buildBuckets = (range: RangeKey, now: Date): Bucket[] => {
         salesCount: 0,
       })
     }
+  } else if (range === "yearly") {
+    for (let i = 11; i >= 0; i -= 1) {
+      const start = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 1)
+      buckets.push({
+        label: `${monthLabels[start.getMonth()]} ${String(
+          start.getFullYear()
+        ).slice(-2)}`,
+        start: start.getTime(),
+        end: Math.min(end.getTime(), nowTime),
+        revenue: 0,
+        restockSpend: 0,
+        salesCount: 0,
+      })
+    }
+  } else {
+    const earliest =
+      transactions.length > 0
+        ? Math.min(...transactions.map(tx => tx.timestamp))
+        : nowTime
+    buckets.push({
+      label: allTimeLabel,
+      start: earliest,
+      end: nowTime,
+      revenue: 0,
+      restockSpend: 0,
+      salesCount: 0,
+    })
   }
 
   return buckets
 }
 
 export default function InsightsScreen() {
+  const [products, setProducts] = useState<Product[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [range, setRange] = useState<RangeKey>("daily")
   const [showMenu, setShowMenu] = useState(false)
@@ -125,14 +166,16 @@ export default function InsightsScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      setProducts([...getProducts()])
       setTransactions([...getTransactions()])
     }, [])
   )
 
-  const { buckets, summary } = useMemo(() => {
+  const { buckets, summary, productSummaries } = useMemo(() => {
     const now = new Date()
-    const buckets = buildBuckets(range, now)
+    const buckets = buildBuckets(range, now, transactions, t("allTime"))
     const currentStart = buckets[buckets.length - 1]?.start ?? now.getTime()
+    const rangeStart = buckets[0]?.start ?? now.getTime()
 
     const inRange = (start: number, end: number) =>
       transactions.filter(
@@ -165,6 +208,29 @@ export default function InsightsScreen() {
       0
     )
 
+    const rangeTx = inRange(rangeStart, now.getTime())
+    const productSummaries = rangeTx.reduce(
+      (acc, tx) => {
+        const current = acc[tx.productId] ?? {
+          name: tx.productName,
+          revenue: 0,
+          expenses: 0,
+        }
+        if (tx.type === "sale") {
+          current.revenue += tx.amount
+        }
+        if (tx.type === "restock") {
+          current.expenses += tx.amount
+        }
+        acc[tx.productId] = current
+        return acc
+      },
+      {} as Record<
+        number,
+        { name: string; revenue: number; expenses: number }
+      >
+    )
+
     return {
       buckets: fillBuckets,
       summary: {
@@ -176,8 +242,11 @@ export default function InsightsScreen() {
           0
         ),
       },
+      productSummaries: Object.values(productSummaries).sort(
+        (a, b) => b.revenue - a.revenue
+      ),
     }
-  }, [range, transactions])
+  }, [range, t, transactions])
 
   const maxRevenue = Math.max(
     1,
@@ -193,6 +262,8 @@ export default function InsightsScreen() {
     { key: "daily", label: t("daily") },
     { key: "weekly", label: t("weekly") },
     { key: "monthly", label: t("monthly") },
+    { key: "yearly", label: t("yearly") },
+    { key: "allTime", label: t("allTime") },
   ]
 
   return (
@@ -264,6 +335,43 @@ export default function InsightsScreen() {
             <Text style={styles.summaryLabel}>{t("totalSales")}</Text>
             <Text style={styles.summaryValue}>{summary.salesCount}</Text>
           </View>
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryLabel}>{t("totalProducts")}</Text>
+            <Text style={styles.summaryValue}>{products.length}</Text>
+          </View>
+        </View>
+
+        <Text style={styles.sectionTitle}>{t("productBreakdown")}</Text>
+        <View style={styles.productCard}>
+          <View style={styles.productHeaderRow}>
+            <Text style={styles.productHeader}>{t("productName")}</Text>
+            <View style={styles.productHeaderTotals}>
+              <Text style={styles.productHeader}>{t("revenue")}</Text>
+              <Text style={styles.productHeader}>{t("expenses")}</Text>
+            </View>
+          </View>
+          {productSummaries.length ? (
+            productSummaries.map(product => (
+              <View key={product.name} style={styles.productRow}>
+                <Text style={styles.productName}>{product.name}</Text>
+                <View style={styles.productTotals}>
+                  <Text style={styles.productValue}>
+                    {formatMoney(product.revenue)}
+                  </Text>
+                  <Text style={styles.productValueAlt}>
+                    {formatMoney(product.expenses)}
+                  </Text>
+                </View>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.productEmpty}>{t("historyEmpty")}</Text>
+          )}
+          <Text style={styles.productNote}>
+            {t("reportRange")}:{" "}
+            {rangeOptions.find(option => option.key === range)?.label ??
+              t("daily")}
+          </Text>
         </View>
 
         <Text style={styles.sectionTitle}>{t("salesTrend")}</Text>
@@ -457,6 +565,67 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 10,
     marginBottom: 10,
+  },
+  productCard: {
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#ececec",
+    backgroundColor: "#fff",
+    padding: 14,
+    marginBottom: 16,
+  },
+  productHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  productHeaderTotals: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  productHeader: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#666",
+  },
+  productRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  productName: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#222",
+    marginRight: 12,
+  },
+  productTotals: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  productValue: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#1f6feb",
+  },
+  productValueAlt: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#f58a3c",
+  },
+  productEmpty: {
+    fontSize: 12,
+    color: "#666",
+    textAlign: "center",
+    paddingVertical: 12,
+  },
+  productNote: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 10,
   },
   chartCard: {
     borderRadius: 14,

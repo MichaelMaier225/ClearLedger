@@ -63,6 +63,8 @@ type TranslationKey =
   | "language"
   | "lowStock"
   | "monthly"
+  | "yearly"
+  | "allTime"
   | "mostRestockedItem"
   | "mostSoldItem"
   | "apply"
@@ -81,6 +83,8 @@ type TranslationKey =
   | "salesTrend"
   | "salesLogged"
   | "profit"
+  | "productBreakdown"
+  | "totalProducts"
   | "productInsights"
   | "qtyUnitCost"
   | "qtyUnitPrice"
@@ -208,6 +212,8 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     language: "Language",
     lowStock: "Low stock",
     monthly: "Monthly",
+    yearly: "Yearly",
+    allTime: "All time",
     mostRestockedItem: "Most restocked item",
     mostSoldItem: "Most sold item",
     apply: "Apply",
@@ -226,6 +232,8 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     salesTrend: "Sales trend",
     salesLogged: "total sales logged.",
     profit: "Profit",
+    productBreakdown: "Product breakdown",
+    totalProducts: "Total products",
     productInsights: "Product insights",
     qtyUnitCost: "qty × unit cost",
     qtyUnitPrice: "qty × unit price",
@@ -359,6 +367,8 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     language: "Ngôn ngữ",
     lowStock: "Sắp hết hàng",
     monthly: "Theo tháng",
+    yearly: "Theo năm",
+    allTime: "Mọi thời gian",
     mostRestockedItem: "Mặt hàng nhập nhiều nhất",
     mostSoldItem: "Mặt hàng bán chạy nhất",
     apply: "Áp dụng",
@@ -377,6 +387,8 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     salesTrend: "Xu hướng bán hàng",
     salesLogged: "giao dịch bán hàng đã ghi.",
     profit: "Lợi nhuận",
+    productBreakdown: "Tổng quan sản phẩm",
+    totalProducts: "Tổng số sản phẩm",
     productInsights: "Thông tin sản phẩm",
     qtyUnitCost: "số lượng × giá vốn",
     qtyUnitPrice: "số lượng × giá bán",
