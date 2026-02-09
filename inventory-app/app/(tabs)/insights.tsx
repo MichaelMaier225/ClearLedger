@@ -13,6 +13,7 @@ import { getProducts, Product } from "../../store/products"
 import { getTransactions, Transaction } from "../../store/transactions"
 import { useCurrency } from "../../hooks/use-currency"
 import { useLanguage } from "../../hooks/use-language"
+import { InsightsSwitcher } from "../../components/insights-switcher"
 
 type RangeKey =
   | "hourly"
@@ -312,6 +313,8 @@ export default function InsightsScreen() {
             ) : null}
           </View>
         </View>
+
+        <InsightsSwitcher />
 
         <View style={styles.summaryRow}>
           <View style={styles.summaryCard}>

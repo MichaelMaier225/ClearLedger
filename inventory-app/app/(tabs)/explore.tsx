@@ -7,6 +7,7 @@ import {
 } from "react-native"
 
 import { useLanguage } from "../../hooks/use-language"
+import { InsightsSwitcher } from "../../components/insights-switcher"
 
 export default function ExploreScreen() {
   const { t } = useLanguage()
@@ -15,6 +16,7 @@ export default function ExploreScreen() {
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>{t("explore")}</Text>
+        <InsightsSwitcher />
         <Text style={styles.subtitle}>{t("exploreHeadline")}</Text>
 
         <View style={styles.card}>
