@@ -15,6 +15,7 @@ import {
 } from "../../store/transactions"
 import { useLanguage } from "../../hooks/use-language"
 import { useCurrency } from "../../hooks/use-currency"
+import { InsightsSwitcher } from "../../components/insights-switcher"
 
 export default function AnalyticsScreen() {
   const [products, setProducts] = useState<Product[]>([])
@@ -221,6 +222,7 @@ export default function AnalyticsScreen() {
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>{t("analyticsTitle")}</Text>
+        <InsightsSwitcher />
         <Text style={styles.subtitle}>{t("salesOverview")}</Text>
 
         <View style={styles.grid}>
