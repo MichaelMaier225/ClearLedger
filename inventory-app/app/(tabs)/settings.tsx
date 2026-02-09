@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Alert,
+  ScrollView,
 } from "react-native"
 
 import { useLanguage } from "../../hooks/use-language"
@@ -89,7 +90,10 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>{t("settingsTitle")}</Text>
         <Text style={styles.subtitle}>{t("changeLanguageHelper")}</Text>
 
@@ -184,7 +188,7 @@ export default function SettingsScreen() {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   )
 }
@@ -196,6 +200,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 20,
+    paddingBottom: 32,
   },
   title: {
     fontSize: 28,
