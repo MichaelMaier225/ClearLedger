@@ -12,6 +12,7 @@ export type Transaction = {
   type: TransactionType
   quantity: number
   amount: number
+  inventoryDelta?: number
   timestamp: number
 }
 

@@ -112,6 +112,8 @@ type TranslationKey =
   | "totalRevenue"
   | "totalSales"
   | "undo"
+  | "undoTransactionTitle"
+  | "undoTransactionBody"
   | "vendors"
   | "weekly"
   | "daily"
@@ -277,6 +279,9 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     totalRevenue: "Total revenue",
     totalSales: "Total sales",
     undo: "Undo",
+    undoTransactionTitle: "Undo transaction?",
+    undoTransactionBody:
+      "This will reverse the transaction and remove it from history.",
     vendors: "Vendors",
     weekly: "Weekly",
     daily: "Daily",
@@ -448,6 +453,9 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     totalRevenue: "Tổng doanh thu",
     totalSales: "Tổng số bán",
     undo: "Hoàn tác",
+    undoTransactionTitle: "Hoàn tác giao dịch?",
+    undoTransactionBody:
+      "Thao tác này sẽ đảo ngược giao dịch và xóa khỏi lịch sử.",
     vendors: "Nhà cung cấp",
     weekly: "Theo tuần",
     daily: "Theo ngày",

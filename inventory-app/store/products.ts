@@ -292,6 +292,7 @@ export const setProductInventory = (id: number, newQty: number) => {
       type: "adjustment",
       quantity: Math.abs(adjustmentQty),
       amount: 0,
+      inventoryDelta: adjustmentQty,
     })
   }
 
@@ -321,6 +322,7 @@ export const wasteProduct = (id: number) => {
       type: "adjustment",
       quantity: 1,
       amount: 0,
+      inventoryDelta: -1,
     })
   }
 
@@ -355,6 +357,7 @@ export const wasteProductBulk = (id: number, qtyToRemove: number) => {
       type: "adjustment",
       quantity: removedQty,
       amount: 0,
+      inventoryDelta: -removedQty,
     })
   }
 
@@ -505,5 +508,49 @@ export const undoLastAction = () => {
   )
   previousState = null
 
+  saveState()
+}
+
+export const undoTransaction = (transactionId: number) => {
+  const transactions = getTransactions()
+  const target = transactions.find(tx => tx.id === transactionId)
+  if (!target) return
+
+  snapshot()
+
+  products = products.map(product => {
+    if (product.id !== target.productId) return product
+
+    if (target.type === "sale") {
+      return {
+        ...product,
+        qty: product.qty + target.quantity,
+        revenue: Math.max(0, product.revenue - target.amount),
+      }
+    }
+
+    if (target.type === "restock") {
+      return {
+        ...product,
+        qty: Math.max(0, product.qty - target.quantity),
+        expenses: Math.max(0, product.expenses - target.amount),
+      }
+    }
+
+    if (target.type === "adjustment") {
+      if (typeof target.inventoryDelta !== "number") {
+        return product
+      }
+
+      return {
+        ...product,
+        qty: Math.max(0, product.qty - target.inventoryDelta),
+      }
+    }
+
+    return product
+  })
+
+  setTransactions(transactions.filter(tx => tx.id !== target.id))
   saveState()
 }
